@@ -1,4 +1,5 @@
 # Chapter-07/tracing_filter_example.py
+
 """
 Demonstrates how to create a **custom trace processor** to filter or
 scrub sensitive data from traces before they are exported.
