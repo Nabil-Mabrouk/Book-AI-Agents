@@ -25,9 +25,8 @@ from agents import (
     input_guardrail,
     GuardrailFunctionOutput,
     InputGuardrailTripwireTriggered,
-    MCPServer,
-    MCPServerSse,
 )
+from agents.mcp import MCPServerSse, MCPServer
 
 # ------------------------------------------------------------------
 # 1. PYDANTIC MODELS (Data Contracts)
@@ -50,8 +49,8 @@ class LocalContext(BaseModel):
 # 2. LOCAL TOOLS (The Agent's Built-in Capabilities)
 # ------------------------------------------------------------------
 
-@function_tool(param_model=UserInput)
-async def get_user_info(query: str, wrapper: RunContextWrapper[LocalContext]) -> Dict[str, Any]:
+@function_tool
+async def get_user_info(wrapper: RunContextWrapper[LocalContext],payload: UserInput) -> Dict[str, Any]:
     """
     TODO: A one-sentence description of what this tool does.
     Gets internal information about the current user, such as their ID or session.
@@ -62,7 +61,7 @@ async def get_user_info(query: str, wrapper: RunContextWrapper[LocalContext]) ->
     return {
         "user_id": user_ctx.user_id,
         "session_id": user_ctx.session_id,
-        "note": f"Request was: '{query}'"
+        "note": f"Request was: '{payload.query}'"
     }
 
 # ------------------------------------------------------------------
@@ -117,6 +116,7 @@ primary_agent = Agent(
     - For math problems, use the external 'add' tool from the MCP server.
     """,
     tools=[get_user_info], # <-- Local tools are listed here.
+    mcp_servers=self.mcp_servers,
     input_guardrails=[block_short_prompts_guardrail],
     model="gpt-4-turbo",
 )
@@ -156,10 +156,9 @@ class WorkflowManager:
         try:
             with trace("MyAgentWorkflow"):
                 result = await Runner.run(
-                    agent=primary_agent,
-                    user_input=user_query,
+                    primary_agent,
+                    user_query,
                     context=ctx,
-                    mcp_servers=self.mcp_servers,
                     run_config=RunConfig(trace_metadata={"user": ctx.user_id}),
                 )
                 self.console.print("\n[bold green]✅ Workflow Complete![/bold green]")
