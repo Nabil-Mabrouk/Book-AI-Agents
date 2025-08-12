@@ -1,0 +1,6 @@
+# requirements.txt
+openai-agents
+requests
+python-slugify
+rich
+python-dotenv
