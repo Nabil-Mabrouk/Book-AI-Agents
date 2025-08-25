@@ -10,6 +10,5 @@ activity_agent = Agent(
     ),
     tools=[get_commit_activity],
 
-    # CORRECTED: The agent formally declares its output contract.
     output_type=ActivityAnalysis,
 )
