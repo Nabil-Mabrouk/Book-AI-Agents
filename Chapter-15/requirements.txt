@@ -1,5 +1,0 @@
-openai-agents[voice]
-sounddevice
-numpy
-rich
-python-dotenv
